@@ -116,7 +116,7 @@ const Catatan = () => {
         <div className="records-grid-top">
           {/* Card 1: Pengeluaran Hari Ini */}
           <div className="dashboard-card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <h2 className="card-title">💸 Pengeluaran Hari Ini</h2>
+            <h2 className="card-title"> Pengeluaran Hari Ini</h2>
             <div className="card-content" style={{ flex: 'none', marginBottom: '16px' }}>
               <h3 className="expense-value">Rp {totalExpenseToday.toLocaleString('id-ID')}</h3>
               <div>
@@ -142,7 +142,7 @@ const Catatan = () => {
 
           {/* Card 1.5: Total Pengeluaran */}
           <div className="dashboard-card">
-            <h2 className="card-title">📉 Total Pengeluaran (Bulan Ini)</h2>
+            <h2 className="card-title"> Total Pengeluaran (Bulan Ini)</h2>
             <div className="card-content">
               <h3 className="expense-value" style={{ color: '#c62828' }}>Rp {totalExpenseOverall.toLocaleString('id-ID')}</h3>
             </div>
@@ -150,7 +150,7 @@ const Catatan = () => {
 
           {/* Card 2: Total Pendapatan */}
           <div className="dashboard-card">
-            <h2 className="card-title">💰 Total Pendapatan (Bulan Ini)</h2>
+            <h2 className="card-title"> Total Pendapatan (Bulan Ini)</h2>
             <div className="card-content">
               <h3 className="income-value">Rp {totalIncome.toLocaleString('id-ID')}</h3>
             </div>
@@ -158,7 +158,7 @@ const Catatan = () => {
 
           {/* Card 3: Total Tonase Panen */}
           <div className="dashboard-card">
-            <h2 className="card-title">🚜 Total Tonase Panen (Bulan Ini)</h2>
+            <h2 className="card-title"> Total Tonase Panen (Bulan Ini)</h2>
             <div className="card-content">
               <h3 className="tonnage-value">{totalTonnage.toFixed(2)} Ton</h3>
             </div>
@@ -169,7 +169,7 @@ const Catatan = () => {
           {/* Section: Grafik Pendapatan Panen */}
           <div className="dashboard-card" style={{ gridColumn: '1 / -1' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 className="card-title" style={{ margin: 0 }}>📊 Grafik Pendapatan Panen (Bulan Ini)</h2>
+              <h2 className="card-title" style={{ margin: 0 }}> Grafik Pendapatan Panen (Bulan Ini)</h2>
               <select 
                 className="form-control" 
                 style={{ width: 'auto', padding: '6px 12px' }}
@@ -230,7 +230,7 @@ const Catatan = () => {
 
           {/* Section: Pendapatan Panen Tabel */}
           <div className="dashboard-card">
-            <h2 className="card-title">📋 Riwayat Pendapatan Panen</h2>
+            <h2 className="card-title"> Riwayat Pendapatan Panen</h2>
             <div className="table-container">
               <table className="harvest-table">
                 <thead>
@@ -264,7 +264,7 @@ const Catatan = () => {
 
           {/* Section: Stok Gudang */}
           <div className="dashboard-card">
-            <h2 className="card-title">📦 Stok Gudang</h2>
+            <h2 className="card-title"> Stok Gudang</h2>
             <div className="inventory-list">
               {mappedInventory.map((item) => (
                 <div key={item.id} className="inventory-item">

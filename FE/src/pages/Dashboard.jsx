@@ -54,10 +54,10 @@ const Dashboard = () => {
   if (latestPrice && previousPrice) {
     const diff = latestPrice.price - previousPrice.price;
     if (diff > 0) {
-      priceTrend = `⬆ Rp ${diff} dari kemarin`;
+      priceTrend = ` Rp ${diff} dari kemarin`;
       priceTrendColor = '#4caf50';
     } else if (diff < 0) {
-      priceTrend = `⬇ Rp ${Math.abs(diff)} dari kemarin`;
+      priceTrend = ` Rp ${Math.abs(diff)} dari kemarin`;
       priceTrendColor = '#f44336';
     } else {
       priceTrend = `Stabil`;
@@ -80,7 +80,7 @@ const Dashboard = () => {
         <div className="dashboard-cards-top">
           {/* Card 1: Harga TBS Hari Ini */}
           <div className="dashboard-card">
-            <h2 className="card-title">💰 Harga TBS Hari Ini</h2>
+            <h2 className="card-title"> Harga TBS Hari Ini</h2>
             <div className="card-content">
               <h3 className="price-value">
                 {latestPrice ? `Rp ${latestPrice.price.toLocaleString('id-ID')}` : '-'} <span className="price-unit">/ kg</span>
@@ -92,13 +92,13 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="card-footer">
-              🕒 Terakhir diperbarui: {latestPrice ? dayjs(latestPrice.date).format('DD MMM YYYY') : '-'}
+               Terakhir diperbarui: {latestPrice ? dayjs(latestPrice.date).format('DD MMM YYYY') : '-'}
             </div>
           </div>
 
           {/* Card 2: Berita Terkini */}
           <div className="dashboard-card">
-            <h2 className="card-title">📰 Berita Terkini</h2>
+            <h2 className="card-title"> Berita Terkini</h2>
             <div className="card-content">
               <h3 className="news-headline" style={{ color: latestNews ? '#333' : '#999' }}>
                 {latestNews ? latestNews.headline : '-'}
@@ -108,7 +108,7 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="card-footer">
-              🕒 Terakhir diperbarui: {latestNews ? dayjs(latestNews.date).format('DD MMM YYYY') : '-'}
+               Terakhir diperbarui: {latestNews ? dayjs(latestNews.date).format('DD MMM YYYY') : '-'}
             </div>
           </div>
         </div>
@@ -116,7 +116,7 @@ const Dashboard = () => {
         <div className="dashboard-cards-bottom">
           {/* Card 3: Grafik Riwayat Harga TBS */}
           <div className="dashboard-card">
-            <h2 className="card-title">📈 Riwayat Harga TBS (Bulan Ini)</h2>
+            <h2 className="card-title"> Riwayat Harga TBS (Bulan Ini)</h2>
             <div className="card-content">
               <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">

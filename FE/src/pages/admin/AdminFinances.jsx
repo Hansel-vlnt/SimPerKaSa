@@ -164,7 +164,7 @@ const AdminFinances = () => {
             {records.map(record => (
               <tr key={record.id}>
                 <td>{record.id}</td>
-                <td>{record.type === 'income' ? '🟢 Income' : '🔴 Expense'}</td>
+                <td>{record.type === 'income' ? ' Income' : ' Expense'}</td>
                 <td>{record.amount.toLocaleString('id-ID')}</td>
                 <td>{record.description || '-'}</td>
                 <td>{record.date}</td>

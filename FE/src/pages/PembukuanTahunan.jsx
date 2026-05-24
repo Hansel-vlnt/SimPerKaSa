@@ -165,7 +165,7 @@ const PembukuanTahunan = () => {
               gap: '6px'
             }}
           >
-            📥 Download CSV
+             Download CSV
           </button>
           <div className="year-selector">
             <label>Pilih Tahun: </label>
@@ -184,19 +184,19 @@ const PembukuanTahunan = () => {
         {/* Summary Cards */}
         <div className="records-grid-top">
           <div className="dashboard-card">
-            <h2 className="card-title">💰 Total Pendapatan ({selectedYear})</h2>
+            <h2 className="card-title"> Total Pendapatan ({selectedYear})</h2>
             <div className="card-content">
               <h3 className="income-value">Rp {totalYearIncome.toLocaleString('id-ID')}</h3>
             </div>
           </div>
           <div className="dashboard-card">
-            <h2 className="card-title">📉 Total Pengeluaran ({selectedYear})</h2>
+            <h2 className="card-title"> Total Pengeluaran ({selectedYear})</h2>
             <div className="card-content">
               <h3 className="expense-value" style={{ color: '#c62828' }}>Rp {totalYearExpense.toLocaleString('id-ID')}</h3>
             </div>
           </div>
           <div className="dashboard-card">
-            <h2 className="card-title">💵 Laba Bersih ({selectedYear})</h2>
+            <h2 className="card-title"> Laba Bersih ({selectedYear})</h2>
             <div className="card-content">
               <h3 style={{ color: totalYearProfit >= 0 ? '#1a4d33' : '#c62828', fontSize: '1.8rem', margin: 0 }}>
                 Rp {totalYearProfit.toLocaleString('id-ID')}
@@ -204,7 +204,7 @@ const PembukuanTahunan = () => {
             </div>
           </div>
           <div className="dashboard-card">
-            <h2 className="card-title">🚜 Total Tonase ({selectedYear})</h2>
+            <h2 className="card-title"> Total Tonase ({selectedYear})</h2>
             <div className="card-content">
               <h3 className="tonnage-value">{totalYearTonnage.toFixed(2)} Ton</h3>
             </div>
@@ -213,7 +213,7 @@ const PembukuanTahunan = () => {
 
         {/* Chart Section */}
         <div className="dashboard-card" style={{ marginTop: '20px' }}>
-          <h2 className="card-title">📊 Grafik Perbandingan Pendapatan vs Pengeluaran</h2>
+          <h2 className="card-title"> Grafik Perbandingan Pendapatan vs Pengeluaran</h2>
           <div style={{ width: '100%', height: '400px', marginTop: '20px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={yearlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -243,7 +243,7 @@ const PembukuanTahunan = () => {
 
         {/* Table Section */}
         <div className="dashboard-card" style={{ marginTop: '20px' }}>
-          <h2 className="card-title">📋 Rincian 12 Bulan</h2>
+          <h2 className="card-title"> Rincian 12 Bulan</h2>
           <div className="table-container">
             <table className="harvest-table">
               <thead>

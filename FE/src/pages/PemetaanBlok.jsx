@@ -80,26 +80,26 @@ const PemetaanBlok = () => {
                 className={`tool-button ${activeTool === 'polygon' ? 'active' : ''}`}
                 onClick={() => setActiveTool('polygon')}
               >
-                <span>✏️</span> Draw New Block
+                <span></span> Draw New Block
               </button>
               <button 
                 className={`tool-button ${activeTool === 'node' ? 'active' : ''}`}
                 onClick={() => setActiveTool('node')}
               >
-                <span>➕</span> Add Node
+                <span></span> Add Node
               </button>
               <button 
                 className={`tool-button ${activeTool === 'edit' ? 'active' : ''}`}
                 onClick={() => setActiveTool('edit')}
               >
-                <span>🖐️</span> Edit Boundary
+                <span></span> Edit Boundary
               </button>
               <div style={{ height: '16px' }}></div>
               <button className="tool-button">
-                <span>💾</span> Save Layout
+                <span></span> Save Layout
               </button>
               <button className="tool-button danger">
-                <span>🗑️</span> Clear Canvas
+                <span></span> Clear Canvas
               </button>
             </div>
 
