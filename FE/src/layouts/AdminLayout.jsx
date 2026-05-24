@@ -33,6 +33,17 @@ const AdminLayout = () => {
         </nav>
         <div className="admin-sidebar-footer">
           <Link to="/" className="back-link">← Back to App</Link>
+          <button 
+            onClick={() => {
+              localStorage.removeItem('admin_token');
+              localStorage.removeItem('admin_username');
+              window.location.href = '/login';
+            }} 
+            className="back-link" 
+            style={{marginTop: '10px', color: '#c62828', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0, fontSize: '1rem', width: '100%'}}
+          >
+             Logout
+          </button>
         </div>
       </aside>
       <main className="admin-main">

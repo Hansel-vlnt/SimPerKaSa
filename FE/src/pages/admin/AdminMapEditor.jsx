@@ -26,6 +26,23 @@ const AdminMapEditor = () => {
     fetchBlocks();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault(); // Prevent browser save
+        if (isDrawing && currentPolygon.length > 2) {
+          setIsDrawing(false);
+          setShowForm(true);
+        } else if (showForm) {
+          const btn = document.getElementById('save-block-btn');
+          if (btn) btn.click();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDrawing, currentPolygon, showForm]);
+
   const getSvgPoint = (clientX, clientY) => {
     const svg = svgRef.current;
     if (!svg) return { x: 0, y: 0 };
@@ -55,10 +72,21 @@ const AdminMapEditor = () => {
   };
 
   const handleCanvasDoubleClick = () => {
+    // We keep double click as a fallback, but the user requested Ctrl+S
     if (isDrawing && currentPolygon.length > 2) {
-      // Close the polygon
       setIsDrawing(false);
       setShowForm(true);
+    }
+  };
+
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    if (isDrawing && currentPolygon.length > 0) {
+      const newPolygon = currentPolygon.slice(0, -1);
+      setCurrentPolygon(newPolygon);
+      if (newPolygon.length === 0) {
+        setIsDrawing(false);
+      }
     }
   };
 
@@ -106,7 +134,7 @@ const AdminMapEditor = () => {
     <div className="admin-page">
       <div className="admin-page-header">
         <h1>Map Editor (Admin)</h1>
-        <p>Click to add nodes. Double-click to close the polygon and save.</p>
+        <p>Click to add nodes. Right click to remove a node. Ctrl+S to save.</p>
       </div>
 
       <div className="admin-map-container">
@@ -133,6 +161,7 @@ const AdminMapEditor = () => {
             onMouseMove={handleMouseMove}
             onClick={handleCanvasClick}
             onDoubleClick={handleCanvasDoubleClick}
+            onContextMenu={handleContextMenu}
           >
             <svg ref={svgRef} viewBox="0 0 800 600" className="editor-svg">
               {/* Existing Blocks */}
@@ -220,7 +249,7 @@ const AdminMapEditor = () => {
                     </div>
                     <div className="form-actions">
                       <button type="button" className="btn" onClick={handleCancel}>Cancel</button>
-                      <button type="submit" className="btn btn-primary">Save Block</button>
+                      <button type="submit" id="save-block-btn" className="btn btn-primary">Save Block</button>
                     </div>
                   </form>
                 </div>

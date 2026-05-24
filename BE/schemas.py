@@ -16,7 +16,7 @@ class FinanceRecordCreate(FinanceRecordBase):
     pass
 
 class FinanceRecord(FinanceRecordBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -32,7 +32,7 @@ class HarvestRecordCreate(HarvestRecordBase):
     pass
 
 class HarvestRecord(HarvestRecordBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -47,7 +47,7 @@ class InventoryCreate(InventoryBase):
     pass
 
 class Inventory(InventoryBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -64,7 +64,7 @@ class PlantationBlockCreate(PlantationBlockBase):
     pass
 
 class PlantationBlock(PlantationBlockBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -77,7 +77,7 @@ class TbsPriceCreate(TbsPriceBase):
     pass
 
 class TbsPrice(TbsPriceBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -91,7 +91,7 @@ class NewsCreate(NewsBase):
     pass
 
 class News(NewsBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True

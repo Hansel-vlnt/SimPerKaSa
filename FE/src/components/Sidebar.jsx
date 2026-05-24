@@ -26,6 +26,12 @@ const Sidebar = () => {
               </NavLink>
             </li>
             <li>
+              <NavLink to="/tahunan" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+                <span className="icon">📔</span>
+                <span className="link-text">Buku Tahunan</span>
+              </NavLink>
+            </li>
+            <li>
               <NavLink to="/blok-kebun" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
                 <span className="icon">🗺️</span>
                 <span className="link-text">Blok Kebun</span>

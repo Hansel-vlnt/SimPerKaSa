@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 from typing import List
+from motor.motor_asyncio import AsyncIOMotorDatabase
+from bson import ObjectId
+from bson.errors import InvalidId
 
-import models, schemas
-from database import engine, get_db
-
-models.Base.metadata.create_all(bind=engine)
+import schemas
+from database import get_db
 
 app = FastAPI(title="SimPerKaSa API")
 
@@ -18,150 +18,165 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def serialize_doc(doc):
+    if not doc:
+        return None
+    doc["id"] = str(doc.pop("_id"))
+    return doc
+
+def get_query_id(id_str: str):
+    try:
+        return {"$in": [id_str, ObjectId(id_str)]}
+    except InvalidId:
+        return id_str
+
 # --- Auth / Login ---
 
 @app.post("/api/login")
-def login_admin(req: schemas.LoginRequest, db: Session = Depends(get_db)):
-    admin = db.query(models.Admin).filter(models.Admin.username == req.username).first()
-    if not admin or admin.password != req.password:
+async def login_admin(req: schemas.LoginRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
+    admin = await db["admins"].find_one({"username": req.username})
+    if not admin or admin.get("password") != req.password:
         raise HTTPException(status_code=401, detail="Invalid username or password")
     
-    return {"ok": True, "token": "dummy_token_for_now", "username": admin.username}
+    return {"ok": True, "token": "dummy_token_for_now", "username": admin["username"]}
 
 # --- Finance Records ---
 
 @app.get("/api/finances", response_model=List[schemas.FinanceRecord])
-def read_finances(db: Session = Depends(get_db)):
-    return db.query(models.FinanceRecord).all()
+async def read_finances(db: AsyncIOMotorDatabase = Depends(get_db)):
+    cursor = db["finances"].find()
+    docs = await cursor.to_list(length=1000)
+    return [serialize_doc(doc) for doc in docs]
 
 @app.post("/api/finances", response_model=schemas.FinanceRecord)
-def create_finance(finance: schemas.FinanceRecordCreate, db: Session = Depends(get_db)):
-    db_finance = models.FinanceRecord(**finance.dict())
-    db.add(db_finance)
-    db.commit()
-    db.refresh(db_finance)
-    return db_finance
+async def create_finance(finance: schemas.FinanceRecordCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
+    doc = finance.model_dump()
+    # convert date to datetime
+    if "date" in doc:
+        doc["date"] = str(doc["date"])
+    res = await db["finances"].insert_one(doc)
+    doc["_id"] = res.inserted_id
+    return serialize_doc(doc)
 
 @app.delete("/api/finances/{finance_id}")
-def delete_finance(finance_id: int, db: Session = Depends(get_db)):
-    db_finance = db.query(models.FinanceRecord).filter(models.FinanceRecord.id == finance_id).first()
-    if not db_finance:
+async def delete_finance(finance_id: str, db: AsyncIOMotorDatabase = Depends(get_db)):
+    res = await db["finances"].delete_one({"_id": get_query_id(finance_id)})
+    if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Record not found")
-    db.delete(db_finance)
-    db.commit()
     return {"ok": True}
 
 # --- Harvest Records ---
 
 @app.get("/api/harvests", response_model=List[schemas.HarvestRecord])
-def read_harvests(db: Session = Depends(get_db)):
-    return db.query(models.HarvestRecord).all()
+async def read_harvests(db: AsyncIOMotorDatabase = Depends(get_db)):
+    cursor = db["harvests"].find()
+    docs = await cursor.to_list(length=1000)
+    return [serialize_doc(doc) for doc in docs]
 
 @app.post("/api/harvests", response_model=schemas.HarvestRecord)
-def create_harvest(harvest: schemas.HarvestRecordCreate, db: Session = Depends(get_db)):
-    db_harvest = models.HarvestRecord(**harvest.dict())
-    db.add(db_harvest)
-    db.commit()
-    db.refresh(db_harvest)
-    return db_harvest
+async def create_harvest(harvest: schemas.HarvestRecordCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
+    doc = harvest.model_dump()
+    if "date" in doc:
+        doc["date"] = str(doc["date"])
+    res = await db["harvests"].insert_one(doc)
+    doc["_id"] = res.inserted_id
+    return serialize_doc(doc)
 
 @app.delete("/api/harvests/{harvest_id}")
-def delete_harvest(harvest_id: int, db: Session = Depends(get_db)):
-    db_harvest = db.query(models.HarvestRecord).filter(models.HarvestRecord.id == harvest_id).first()
-    if not db_harvest:
+async def delete_harvest(harvest_id: str, db: AsyncIOMotorDatabase = Depends(get_db)):
+    res = await db["harvests"].delete_one({"_id": get_query_id(harvest_id)})
+    if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Record not found")
-    db.delete(db_harvest)
-    db.commit()
     return {"ok": True}
 
 # --- Inventory ---
 
 @app.get("/api/inventory", response_model=List[schemas.Inventory])
-def read_inventory(db: Session = Depends(get_db)):
-    return db.query(models.Inventory).all()
+async def read_inventory(db: AsyncIOMotorDatabase = Depends(get_db)):
+    cursor = db["inventory"].find()
+    docs = await cursor.to_list(length=1000)
+    return [serialize_doc(doc) for doc in docs]
 
 @app.post("/api/inventory", response_model=schemas.Inventory)
-def create_inventory(item: schemas.InventoryCreate, db: Session = Depends(get_db)):
-    db_item = models.Inventory(**item.dict())
-    db.add(db_item)
-    db.commit()
-    db.refresh(db_item)
-    return db_item
+async def create_inventory(item: schemas.InventoryCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
+    doc = item.model_dump()
+    res = await db["inventory"].insert_one(doc)
+    doc["_id"] = res.inserted_id
+    return serialize_doc(doc)
 
 @app.delete("/api/inventory/{item_id}")
-def delete_inventory(item_id: int, db: Session = Depends(get_db)):
-    db_item = db.query(models.Inventory).filter(models.Inventory.id == item_id).first()
-    if not db_item:
+async def delete_inventory(item_id: str, db: AsyncIOMotorDatabase = Depends(get_db)):
+    res = await db["inventory"].delete_one({"_id": get_query_id(item_id)})
+    if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Item not found")
-    db.delete(db_item)
-    db.commit()
     return {"ok": True}
 
 # --- Plantation Blocks ---
 
 @app.get("/api/blocks", response_model=List[schemas.PlantationBlock])
-def read_blocks(db: Session = Depends(get_db)):
-    return db.query(models.PlantationBlock).all()
+async def read_blocks(db: AsyncIOMotorDatabase = Depends(get_db)):
+    cursor = db["blocks"].find()
+    docs = await cursor.to_list(length=1000)
+    return [serialize_doc(doc) for doc in docs]
 
 @app.post("/api/blocks", response_model=schemas.PlantationBlock)
-def create_block(block: schemas.PlantationBlockCreate, db: Session = Depends(get_db)):
-    db_block = models.PlantationBlock(**block.dict())
-    db.add(db_block)
-    db.commit()
-    db.refresh(db_block)
-    return db_block
+async def create_block(block: schemas.PlantationBlockCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
+    doc = block.model_dump()
+    res = await db["blocks"].insert_one(doc)
+    doc["_id"] = res.inserted_id
+    return serialize_doc(doc)
 
 @app.delete("/api/blocks/{block_id}")
-def delete_block(block_id: int, db: Session = Depends(get_db)):
-    db_block = db.query(models.PlantationBlock).filter(models.PlantationBlock.id == block_id).first()
-    if not db_block:
+async def delete_block(block_id: str, db: AsyncIOMotorDatabase = Depends(get_db)):
+    res = await db["blocks"].delete_one({"_id": get_query_id(block_id)})
+    if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Block not found")
-    db.delete(db_block)
-    db.commit()
     return {"ok": True}
 
 # --- TBS Prices ---
 
 @app.get("/api/tbs_prices", response_model=List[schemas.TbsPrice])
-def read_tbs_prices(db: Session = Depends(get_db)):
-    return db.query(models.TbsPrice).order_by(models.TbsPrice.date.asc()).all()
+async def read_tbs_prices(db: AsyncIOMotorDatabase = Depends(get_db)):
+    cursor = db["tbs_prices"].find().sort("date", 1)
+    docs = await cursor.to_list(length=1000)
+    return [serialize_doc(doc) for doc in docs]
 
 @app.post("/api/tbs_prices", response_model=schemas.TbsPrice)
-def create_tbs_price(price: schemas.TbsPriceCreate, db: Session = Depends(get_db)):
-    db_price = models.TbsPrice(**price.dict())
-    db.add(db_price)
-    db.commit()
-    db.refresh(db_price)
-    return db_price
+async def create_tbs_price(price: schemas.TbsPriceCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
+    doc = price.model_dump()
+    if "date" in doc:
+        doc["date"] = str(doc["date"])
+    res = await db["tbs_prices"].insert_one(doc)
+    doc["_id"] = res.inserted_id
+    return serialize_doc(doc)
 
 @app.delete("/api/tbs_prices/{price_id}")
-def delete_tbs_price(price_id: int, db: Session = Depends(get_db)):
-    db_price = db.query(models.TbsPrice).filter(models.TbsPrice.id == price_id).first()
-    if not db_price:
+async def delete_tbs_price(price_id: str, db: AsyncIOMotorDatabase = Depends(get_db)):
+    res = await db["tbs_prices"].delete_one({"_id": get_query_id(price_id)})
+    if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Price not found")
-    db.delete(db_price)
-    db.commit()
     return {"ok": True}
 
 # --- News ---
 
 @app.get("/api/news", response_model=List[schemas.News])
-def read_news(db: Session = Depends(get_db)):
-    return db.query(models.News).order_by(models.News.date.desc()).all()
+async def read_news(db: AsyncIOMotorDatabase = Depends(get_db)):
+    cursor = db["news"].find().sort("date", -1)
+    docs = await cursor.to_list(length=1000)
+    return [serialize_doc(doc) for doc in docs]
 
 @app.post("/api/news", response_model=schemas.News)
-def create_news(news: schemas.NewsCreate, db: Session = Depends(get_db)):
-    db_news = models.News(**news.dict())
-    db.add(db_news)
-    db.commit()
-    db.refresh(db_news)
-    return db_news
+async def create_news(news: schemas.NewsCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
+    doc = news.model_dump()
+    if "date" in doc:
+        doc["date"] = str(doc["date"])
+    res = await db["news"].insert_one(doc)
+    doc["_id"] = res.inserted_id
+    return serialize_doc(doc)
 
 @app.delete("/api/news/{news_id}")
-def delete_news(news_id: int, db: Session = Depends(get_db)):
-    db_news = db.query(models.News).filter(models.News.id == news_id).first()
-    if not db_news:
+async def delete_news(news_id: str, db: AsyncIOMotorDatabase = Depends(get_db)):
+    res = await db["news"].delete_one({"_id": get_query_id(news_id)})
+    if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="News not found")
-    db.delete(db_news)
-    db.commit()
     return {"ok": True}

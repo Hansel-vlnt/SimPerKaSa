@@ -4,6 +4,7 @@ import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Catatan from './pages/Catatan';
 import BlokKebun from './pages/BlokKebun';
+import PembukuanTahunan from './pages/PembukuanTahunan';
 import Login from './pages/Login';
 
 import AdminLayout from './layouts/AdminLayout';
@@ -28,6 +29,7 @@ function App() {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="catatan" element={<Catatan />} />
+          <Route path="tahunan" element={<PembukuanTahunan />} />
           <Route path="blok-kebun" element={<BlokKebun />} />
         </Route>
         

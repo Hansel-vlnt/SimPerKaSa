@@ -44,23 +44,27 @@ const Catatan = () => {
   }, []);
 
   const todayStr = dayjs().format('YYYY-MM-DD');
+  const currentMonthStr = dayjs().format('YYYY-MM');
 
   const todayExpensesList = finances.filter(f => f.type === 'expense' && f.date === todayStr);
   const totalExpenseToday = todayExpensesList.reduce((sum, f) => sum + f.amount, 0);
 
-  const totalExpenseOverall = finances
+  const monthFinances = finances.filter(f => f.date && f.date.startsWith(currentMonthStr));
+  const monthHarvests = harvests.filter(h => h.date && h.date.startsWith(currentMonthStr));
+
+  const totalExpenseOverall = monthFinances
     .filter(f => f.type === 'expense')
     .reduce((sum, f) => sum + f.amount, 0);
 
-  const manualIncome = finances
+  const manualIncome = monthFinances
     .filter(f => f.type === 'income')
     .reduce((sum, f) => sum + f.amount, 0);
 
-  const harvestIncome = harvests.reduce((sum, h) => sum + h.estimated_income, 0);
+  const harvestIncome = monthHarvests.reduce((sum, h) => sum + (h.estimated_income || 0), 0);
   
   const totalIncome = manualIncome + harvestIncome;
 
-  const totalTonnage = harvests.reduce((sum, h) => sum + h.tonnage, 0);
+  const totalTonnage = monthHarvests.reduce((sum, h) => sum + (h.tonnage || 0), 0);
 
   // Map inventory to display formats
   const mappedInventory = inventory.map(item => {
@@ -81,9 +85,6 @@ const Catatan = () => {
   });
 
   // Calculate Graph Data for this month
-  const currentMonthStr = dayjs().format('YYYY-MM');
-  const monthHarvests = harvests.filter(h => h.date && h.date.startsWith(currentMonthStr));
-  
   const filteredHarvests = selectedBlock === 'Semua Blok' 
     ? monthHarvests 
     : monthHarvests.filter(h => h.block_name === selectedBlock);
@@ -141,7 +142,7 @@ const Catatan = () => {
 
           {/* Card 1.5: Total Pengeluaran */}
           <div className="dashboard-card">
-            <h2 className="card-title">📉 Total Pengeluaran</h2>
+            <h2 className="card-title">📉 Total Pengeluaran (Bulan Ini)</h2>
             <div className="card-content">
               <h3 className="expense-value" style={{ color: '#c62828' }}>Rp {totalExpenseOverall.toLocaleString('id-ID')}</h3>
             </div>
@@ -149,7 +150,7 @@ const Catatan = () => {
 
           {/* Card 2: Total Pendapatan */}
           <div className="dashboard-card">
-            <h2 className="card-title">💰 Total Pendapatan</h2>
+            <h2 className="card-title">💰 Total Pendapatan (Bulan Ini)</h2>
             <div className="card-content">
               <h3 className="income-value">Rp {totalIncome.toLocaleString('id-ID')}</h3>
             </div>
@@ -157,7 +158,7 @@ const Catatan = () => {
 
           {/* Card 3: Total Tonase Panen */}
           <div className="dashboard-card">
-            <h2 className="card-title">🚜 Total Tonase Panen</h2>
+            <h2 className="card-title">🚜 Total Tonase Panen (Bulan Ini)</h2>
             <div className="card-content">
               <h3 className="tonnage-value">{totalTonnage.toFixed(2)} Ton</h3>
             </div>
