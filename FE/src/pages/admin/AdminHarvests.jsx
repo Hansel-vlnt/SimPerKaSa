@@ -2,15 +2,26 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8000/api/harvests';
+const API_TBS = 'http://localhost:8000/api/tbs_prices';
+const API_BLOCKS = 'http://localhost:8000/api/blocks';
 
 const AdminHarvests = () => {
   const [records, setRecords] = useState([]);
+  const [tbsPrices, setTbsPrices] = useState([]);
+  const [blocks, setBlocks] = useState([]);
+  const [tbsError, setTbsError] = useState('');
   const [formData, setFormData] = useState({ block_name: '', tonnage: '', estimated_income: '', date: '' });
 
   const fetchRecords = async () => {
     try {
-      const response = await axios.get(API_URL);
-      setRecords(response.data);
+      const [harvRes, tbsRes, blocksRes] = await Promise.all([
+        axios.get(API_URL),
+        axios.get(API_TBS),
+        axios.get(API_BLOCKS)
+      ]);
+      setRecords(harvRes.data);
+      setTbsPrices(tbsRes.data);
+      setBlocks(blocksRes.data);
     } catch (error) {
       console.error("Error fetching harvests", error);
     }
@@ -20,8 +31,32 @@ const AdminHarvests = () => {
     fetchRecords();
   }, []);
 
+  useEffect(() => {
+    if (formData.date && formData.tonnage && tbsPrices.length > 0) {
+      const priceRecord = tbsPrices.find(p => p.date === formData.date);
+      if (priceRecord) {
+        setTbsError('');
+        const calculatedIncome = parseFloat(formData.tonnage) * 1000 * priceRecord.price;
+        if (formData.estimated_income !== calculatedIncome) {
+          setFormData(prev => ({ ...prev, estimated_income: calculatedIncome }));
+        }
+      } else {
+        setTbsError(`Harga TBS tanggal ${formData.date} belum diatur! Harap atur di Dashboard.`);
+        if (formData.estimated_income !== '') {
+          setFormData(prev => ({ ...prev, estimated_income: '' }));
+        }
+      }
+    } else {
+      setTbsError('');
+    }
+  }, [formData.date, formData.tonnage, tbsPrices]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (tbsError) {
+      alert("Tidak dapat menyimpan data. " + tbsError);
+      return;
+    }
     try {
       await axios.post(API_URL, {
         block_name: formData.block_name,
@@ -58,13 +93,17 @@ const AdminHarvests = () => {
           <div className="form-row">
             <div className="form-group">
               <label>Block Name</label>
-              <input 
-                type="text" 
+              <select 
                 className="form-control" 
                 value={formData.block_name}
                 onChange={e => setFormData({...formData, block_name: e.target.value})}
                 required
-              />
+              >
+                <option value="" disabled>-- Pilih Blok Panen --</option>
+                {blocks.map(b => (
+                  <option key={b.id} value={b.name}>{b.name}</option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label>Tonnage (Ton)</label>
@@ -83,9 +122,11 @@ const AdminHarvests = () => {
                 type="number" 
                 className="form-control" 
                 value={formData.estimated_income}
-                onChange={e => setFormData({...formData, estimated_income: e.target.value})}
-                required
+                readOnly
+                placeholder="Auto-calculated"
+                style={{ backgroundColor: '#f5f5f5', color: '#555', cursor: 'not-allowed', fontWeight: 'bold' }}
               />
+              {tbsError && <small style={{ color: '#d32f2f', fontWeight: 'bold', marginTop: '4px', display: 'block' }}>{tbsError}</small>}
             </div>
             <div className="form-group">
               <label>Date</label>

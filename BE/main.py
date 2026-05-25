@@ -111,6 +111,18 @@ async def delete_inventory(item_id: str, db: AsyncIOMotorDatabase = Depends(get_
         raise HTTPException(status_code=404, detail="Item not found")
     return {"ok": True}
 
+@app.put("/api/inventory/{item_id}/stock")
+async def update_inventory_stock(item_id: str, update_data: schemas.InventoryUpdate, db: AsyncIOMotorDatabase = Depends(get_db)):
+    res = await db["inventory"].update_one(
+        {"_id": get_query_id(item_id)},
+        {"$set": {"current_stock": update_data.current_stock}}
+    )
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    doc = await db["inventory"].find_one({"_id": get_query_id(item_id)})
+    return serialize_doc(doc)
+
 # --- Plantation Blocks ---
 
 @app.get("/api/blocks", response_model=List[schemas.PlantationBlock])
@@ -132,6 +144,38 @@ async def delete_block(block_id: str, db: AsyncIOMotorDatabase = Depends(get_db)
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Block not found")
     return {"ok": True}
+
+@app.put("/api/blocks/{block_id}")
+async def update_block_full(block_id: str, update_data: schemas.PlantationBlockEdit, db: AsyncIOMotorDatabase = Depends(get_db)):
+    update_dict = update_data.model_dump()
+    if update_data.status == "Replanting":
+        update_dict["plant_age"] = 0
+        
+    res = await db["blocks"].update_one(
+        {"_id": get_query_id(block_id)},
+        {"$set": update_dict}
+    )
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Block not found")
+    
+    doc = await db["blocks"].find_one({"_id": get_query_id(block_id)})
+    return serialize_doc(doc)
+
+@app.put("/api/blocks/{block_id}/status")
+async def update_block_status(block_id: str, update_data: schemas.PlantationBlockUpdate, db: AsyncIOMotorDatabase = Depends(get_db)):
+    update_dict = {"status": update_data.status}
+    if update_data.status == "Replanting":
+        update_dict["plant_age"] = 0
+        
+    res = await db["blocks"].update_one(
+        {"_id": get_query_id(block_id)},
+        {"$set": update_dict}
+    )
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Block not found")
+    
+    doc = await db["blocks"].find_one({"_id": get_query_id(block_id)})
+    return serialize_doc(doc)
 
 # --- TBS Prices ---
 

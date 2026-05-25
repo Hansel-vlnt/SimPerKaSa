@@ -11,6 +11,7 @@ const AdminMapEditor = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [formData, setFormData] = useState({ name: '', area_size: '', status: 'Sudah Dipupuk', plant_age: '' });
   const [showForm, setShowForm] = useState(false);
+  const [editingBlockId, setEditingBlockId] = useState(null);
   const svgRef = React.useRef(null);
 
   const fetchBlocks = async () => {
@@ -93,21 +94,29 @@ const AdminMapEditor = () => {
   const handleSaveBlock = async (e) => {
     e.preventDefault();
     
-    // Convert currentPolygon to string format: "x1,y1 x2,y2 ..."
-    const coordsString = currentPolygon.map(pt => `${pt.x},${pt.y}`).join(' ');
-
     try {
-      await axios.post(API_URL, {
-        name: formData.name,
-        area_size: parseFloat(formData.area_size),
-        status: formData.status,
-        plant_age: parseInt(formData.plant_age, 10),
-        coordinates: coordsString
-      });
+      if (editingBlockId) {
+        await axios.put(`${API_URL}/${editingBlockId}`, {
+          name: formData.name,
+          area_size: parseFloat(formData.area_size),
+          status: formData.status,
+          plant_age: parseInt(formData.plant_age, 10),
+        });
+      } else {
+        const coordsString = currentPolygon.map(pt => `${pt.x},${pt.y}`).join(' ');
+        await axios.post(API_URL, {
+          name: formData.name,
+          area_size: parseFloat(formData.area_size),
+          status: formData.status,
+          plant_age: parseInt(formData.plant_age, 10),
+          coordinates: coordsString
+        });
+      }
       
       setFormData({ name: '', area_size: '', status: 'Sudah Dipupuk', plant_age: '' });
       setCurrentPolygon([]);
       setShowForm(false);
+      setEditingBlockId(null);
       fetchBlocks();
     } catch (error) {
       console.error("Error saving block", error);
@@ -119,6 +128,27 @@ const AdminMapEditor = () => {
     setCurrentPolygon([]);
     setShowForm(false);
     setIsDrawing(false);
+    setEditingBlockId(null);
+  };
+
+  const handleEditClick = (block) => {
+    setEditingBlockId(block.id);
+    setFormData({
+      name: block.name,
+      area_size: block.area_size,
+      status: block.status,
+      plant_age: block.plant_age
+    });
+    setShowForm(true);
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await axios.put(`${API_URL}/${id}/status`, { status: newStatus });
+      fetchBlocks();
+    } catch (error) {
+      console.error("Error updating status", error);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -145,10 +175,32 @@ const AdminMapEditor = () => {
               <li key={b.id}>
                 <div>
                   <strong>{b.name}</strong>
-                  <div>{b.area_size} Ha • {b.plant_age} Tahun</div>
-                  <div><small style={{color: b.status === 'Sudah Dipupuk' ? '#2e7d32' : '#f57f17'}}>{b.status}</small></div>
+                  <div>{b.area_size} Ha • {b.plant_age === 0 ? '-' : b.plant_age} Tahun</div>
+                  <div style={{ marginTop: '4px' }}>
+                    <select 
+                      value={b.status} 
+                      onChange={(e) => handleStatusChange(b.id, e.target.value)}
+                      style={{ 
+                        fontSize: '0.85rem', 
+                        padding: '2px 4px', 
+                        borderRadius: '4px',
+                        border: '1px solid #ddd',
+                        backgroundColor: b.status === 'Replanting' ? '#f5f5f5' : (b.status === 'Sudah Dipupuk' ? '#e8f5e9' : '#fff3e0'),
+                        color: b.status === 'Replanting' ? '#616161' : (b.status === 'Sudah Dipupuk' ? '#2e7d32' : '#f57f17'),
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value="Sudah Dipupuk">Sudah Dipupuk</option>
+                      <option value="Belum Dipupuk">Belum Dipupuk</option>
+                      <option value="Replanting">Replanting</option>
+                    </select>
+                  </div>
                 </div>
-                <button className="btn btn-danger" onClick={() => handleDelete(b.id)}>X</button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'center' }}>
+                  <button className="btn btn-secondary" onClick={() => handleEditClick(b)} style={{ padding: '4px 8px', fontSize: '0.85rem' }}>Edit</button>
+                  <button className="btn btn-danger" onClick={() => handleDelete(b.id)} style={{ padding: '4px 8px', fontSize: '0.85rem' }}>Hapus</button>
+                </div>
               </li>
             ))}
           </ul>
@@ -202,7 +254,7 @@ const AdminMapEditor = () => {
             {showForm && (
               <div className="block-form-overlay">
                 <div className="block-form-modal">
-                  <h3>Save Plantation Block</h3>
+                  <h3>{editingBlockId ? "Edit Plantation Block" : "Save Plantation Block"}</h3>
                   <form onSubmit={handleSaveBlock}>
                     <div className="form-group">
                       <label>Block Name</label>
@@ -245,6 +297,7 @@ const AdminMapEditor = () => {
                       >
                         <option value="Sudah Dipupuk">Sudah Dipupuk (Fertilized)</option>
                         <option value="Belum Dipupuk">Belum Dipupuk (Not Fertilized)</option>
+                        <option value="Replanting">Replanting</option>
                       </select>
                     </div>
                     <div className="form-actions">

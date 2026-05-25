@@ -109,6 +109,10 @@ const BlokKebun = () => {
                 <div className="legend-color" style={{ background: '#ffeb3b' }}></div>
                 <span>Belum Dipupuk</span>
               </div>
+              <div className="legend-item">
+                <div className="legend-color" style={{ background: '#9e9e9e' }}></div>
+                <span>Replanting</span>
+              </div>
             </div>
           </div>
 
@@ -131,14 +135,15 @@ const BlokKebun = () => {
                 {blocks.map((block) => {
                   const center = getCenter(block.coordinates);
                   const isFertilized = block.status === 'Sudah Dipupuk';
+                  const isReplanting = block.status === 'Replanting';
                   return (
                     <g key={block.id}>
                       <polygon
                         points={block.coordinates}
                         className="polygon-block"
                         style={{
-                          fill: isFertilized ? '#8fc7a6' : '#fff59d',
-                          stroke: isFertilized ? '#4caf50' : '#fbc02d'
+                          fill: isReplanting ? '#e0e0e0' : (isFertilized ? '#8fc7a6' : '#fff59d'),
+                          stroke: isReplanting ? '#9e9e9e' : (isFertilized ? '#4caf50' : '#fbc02d')
                         }}
                         onMouseEnter={() => setHoveredBlock(block)}
                         onMouseLeave={() => setHoveredBlock(null)}
@@ -175,13 +180,13 @@ const BlokKebun = () => {
                 </div>
                 <div className="tooltip-row">
                   <span className="tooltip-label">Umur Tanaman:</span>
-                  <span className="tooltip-value">{hoveredBlock.plant_age} Tahun</span>
+                  <span className="tooltip-value">{hoveredBlock.plant_age === 0 ? '-' : hoveredBlock.plant_age} Tahun</span>
                 </div>
                 <div className="tooltip-row" style={{ marginTop: '4px' }}>
                   <span className="tooltip-label">Status:</span>
                   <span className="status-badge" style={{
-                    background: hoveredBlock.status === 'Belum Dipupuk' ? '#fff9c4' : '#e8f5e9',
-                    color: hoveredBlock.status === 'Belum Dipupuk' ? '#f57f17' : '#2e7d32'
+                    background: hoveredBlock.status === 'Replanting' ? '#eeeeee' : (hoveredBlock.status === 'Belum Dipupuk' ? '#fff9c4' : '#e8f5e9'),
+                    color: hoveredBlock.status === 'Replanting' ? '#616161' : (hoveredBlock.status === 'Belum Dipupuk' ? '#f57f17' : '#2e7d32')
                   }}>{hoveredBlock.status}</span>
                 </div>
               </div>

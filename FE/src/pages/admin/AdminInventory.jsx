@@ -35,6 +35,15 @@ const AdminInventory = () => {
     }
   };
 
+  const handleStockUpdate = async (id, newStock) => {
+    try {
+      await axios.put(`${API_URL}/${id}/stock`, { current_stock: parseFloat(newStock) });
+      fetchItems();
+    } catch (error) {
+      console.error("Error updating stock", error);
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
@@ -111,7 +120,32 @@ const AdminInventory = () => {
               <tr key={item.id}>
                 <td>{item.id}</td>
                 <td>{item.item_name}</td>
-                <td>{item.current_stock}</td>
+                <td>
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    defaultValue={item.current_stock} 
+                    onBlur={(e) => {
+                      if (parseFloat(e.target.value) !== item.current_stock) {
+                        handleStockUpdate(item.id, e.target.value);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.target.blur();
+                      }
+                    }}
+                    style={{ 
+                      width: '100px', 
+                      padding: '6px', 
+                      borderRadius: '4px', 
+                      border: '1px solid #ccc',
+                      textAlign: 'center',
+                      fontWeight: 'bold',
+                      color: '#1a4d33'
+                    }}
+                  />
+                </td>
                 <td>{item.unit}</td>
                 <td>
                   <button className="btn btn-danger" onClick={() => handleDelete(item.id)}>Delete</button>

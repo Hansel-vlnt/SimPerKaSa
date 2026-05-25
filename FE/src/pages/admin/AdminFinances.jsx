@@ -7,7 +7,7 @@ const API_HARVESTS = 'http://localhost:8000/api/harvests';
 const AdminFinances = () => {
   const [records, setRecords] = useState([]);
   const [harvests, setHarvests] = useState([]);
-  const [formData, setFormData] = useState({ type: 'income', amount: '', description: '', date: '' });
+  const [formData, setFormData] = useState({ type: 'expense', category: 'Biaya Operasional', amount: '', description: '', date: '' });
 
   const fetchData = async () => {
     try {
@@ -31,11 +31,12 @@ const AdminFinances = () => {
     try {
       await axios.post(API_FINANCES, {
         type: formData.type,
+        category: formData.category,
         amount: parseFloat(formData.amount),
         description: formData.description,
         date: formData.date
       });
-      setFormData({ type: 'income', amount: '', description: '', date: '' });
+      setFormData({ type: 'expense', category: 'Biaya Operasional', amount: '', description: '', date: '' });
       fetchData();
     } catch (error) {
       console.error("Error saving record", error);
@@ -106,10 +107,33 @@ const AdminFinances = () => {
               <select 
                 className="form-control" 
                 value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
+                onChange={e => setFormData({...formData, type: e.target.value, category: e.target.value === 'expense' ? 'Biaya Operasional' : 'Pendapatan Lainnya'})}
               >
-                <option value="income">Income (Pendapatan Lainnya)</option>
                 <option value="expense">Expense (Pengeluaran)</option>
+                <option value="income">Income (Pendapatan Lainnya)</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Category</label>
+              <select 
+                className="form-control" 
+                value={formData.category}
+                onChange={e => setFormData({...formData, category: e.target.value})}
+              >
+                {formData.type === 'expense' ? (
+                  <>
+                    <option value="Biaya Operasional">Biaya Operasional</option>
+                    <option value="Pembelian Pupuk">Pembelian Pupuk</option>
+                    <option value="Pembayaran Gaji">Pembayaran Gaji</option>
+                    <option value="Perawatan Alat">Perawatan Alat</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="Pendapatan Lainnya">Pendapatan Lainnya</option>
+                    <option value="Penjualan Sampingan">Penjualan Sampingan</option>
+                  </>
+                )}
               </select>
             </div>
             <div className="form-group">
@@ -154,8 +178,9 @@ const AdminFinances = () => {
             <tr>
               <th>ID</th>
               <th>Type</th>
+              <th>Category</th>
               <th>Amount (Rp)</th>
-              <th>Reason</th>
+              <th>Detailed Description</th>
               <th>Date</th>
               <th>Actions</th>
             </tr>
@@ -165,6 +190,18 @@ const AdminFinances = () => {
               <tr key={record.id}>
                 <td>{record.id}</td>
                 <td>{record.type === 'income' ? ' Income' : ' Expense'}</td>
+                <td>
+                  <span style={{ 
+                    padding: '4px 8px', 
+                    background: '#f5f5f5', 
+                    borderRadius: '4px', 
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    color: '#555'
+                  }}>
+                    {record.category || 'Lainnya'}
+                  </span>
+                </td>
                 <td>{record.amount.toLocaleString('id-ID')}</td>
                 <td>{record.description || '-'}</td>
                 <td>{record.date}</td>

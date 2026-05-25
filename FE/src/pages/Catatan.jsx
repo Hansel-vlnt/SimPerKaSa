@@ -24,6 +24,7 @@ const Catatan = () => {
   const [harvests, setHarvests] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [selectedBlock, setSelectedBlock] = useState('Semua Blok');
+  const [selectedMonth, setSelectedMonth] = useState(dayjs().format('YYYY-MM'));
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,13 +45,12 @@ const Catatan = () => {
   }, []);
 
   const todayStr = dayjs().format('YYYY-MM-DD');
-  const currentMonthStr = dayjs().format('YYYY-MM');
 
   const todayExpensesList = finances.filter(f => f.type === 'expense' && f.date === todayStr);
   const totalExpenseToday = todayExpensesList.reduce((sum, f) => sum + f.amount, 0);
 
-  const monthFinances = finances.filter(f => f.date && f.date.startsWith(currentMonthStr));
-  const monthHarvests = harvests.filter(h => h.date && h.date.startsWith(currentMonthStr));
+  const monthFinances = finances.filter(f => f.date && f.date.startsWith(selectedMonth));
+  const monthHarvests = harvests.filter(h => h.date && h.date.startsWith(selectedMonth));
 
   const totalExpenseOverall = monthFinances
     .filter(f => f.type === 'expense')
@@ -105,11 +105,29 @@ const Catatan = () => {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Catatan & Keuangan</h1>
-        <p className="page-subtitle">
-          <span className="company-name">PT. Palma Nusantara</span> • Ringkasan operasional dan finansial • {currentDate}
-        </p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 className="page-title">Catatan & Keuangan</h1>
+          <p className="page-subtitle">
+            <span className="company-name">PT. Palma Nusantara</span> • Ringkasan operasional dan finansial • {currentDate}
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', padding: '12px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+          <label style={{ fontWeight: 'bold', color: '#1a4d33', margin: 0 }}>Filter Bulan:</label>
+          <input 
+            type="month" 
+            value={selectedMonth} 
+            onChange={e => setSelectedMonth(e.target.value)}
+            style={{ 
+              padding: '6px 12px', 
+              borderRadius: '6px', 
+              border: '1px solid #ccc',
+              fontSize: '1rem',
+              outline: 'none',
+              cursor: 'pointer'
+            }}
+          />
+        </div>
       </div>
 
       <div className="page-content">
@@ -142,7 +160,7 @@ const Catatan = () => {
 
           {/* Card 1.5: Total Pengeluaran */}
           <div className="dashboard-card">
-            <h2 className="card-title"> Total Pengeluaran (Bulan Ini)</h2>
+            <h2 className="card-title"> Total Pengeluaran ({dayjs(selectedMonth).format('MMMM YYYY')})</h2>
             <div className="card-content">
               <h3 className="expense-value" style={{ color: '#c62828' }}>Rp {totalExpenseOverall.toLocaleString('id-ID')}</h3>
             </div>
@@ -150,7 +168,7 @@ const Catatan = () => {
 
           {/* Card 2: Total Pendapatan */}
           <div className="dashboard-card">
-            <h2 className="card-title"> Total Pendapatan (Bulan Ini)</h2>
+            <h2 className="card-title"> Total Pendapatan ({dayjs(selectedMonth).format('MMMM YYYY')})</h2>
             <div className="card-content">
               <h3 className="income-value">Rp {totalIncome.toLocaleString('id-ID')}</h3>
             </div>
@@ -158,7 +176,7 @@ const Catatan = () => {
 
           {/* Card 3: Total Tonase Panen */}
           <div className="dashboard-card">
-            <h2 className="card-title"> Total Tonase Panen (Bulan Ini)</h2>
+            <h2 className="card-title"> Total Tonase Panen ({dayjs(selectedMonth).format('MMMM YYYY')})</h2>
             <div className="card-content">
               <h3 className="tonnage-value">{totalTonnage.toFixed(2)} Ton</h3>
             </div>
@@ -168,8 +186,8 @@ const Catatan = () => {
         <div className="records-grid-bottom">
           {/* Section: Grafik Pendapatan Panen */}
           <div className="dashboard-card" style={{ gridColumn: '1 / -1' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 className="card-title" style={{ margin: 0 }}> Grafik Pendapatan Panen (Bulan Ini)</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
+              <h2 className="card-title" style={{ margin: 0 }}> Grafik Pendapatan Panen ({dayjs(selectedMonth).format('MMMM YYYY')})</h2>
               <select 
                 className="form-control" 
                 style={{ width: 'auto', padding: '6px 12px' }}

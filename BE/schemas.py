@@ -8,6 +8,7 @@ class LoginRequest(BaseModel):
 
 class FinanceRecordBase(BaseModel):
     type: str
+    category: str = "Lainnya"
     amount: float
     description: str = ""
     date: date
@@ -43,6 +44,9 @@ class InventoryBase(BaseModel):
     current_stock: float
     unit: str
 
+class InventoryUpdate(BaseModel):
+    current_stock: float
+
 class InventoryCreate(InventoryBase):
     pass
 
@@ -59,6 +63,15 @@ class PlantationBlockBase(BaseModel):
     status: str
     coordinates: str
     plant_age: int = 0
+
+class PlantationBlockUpdate(BaseModel):
+    status: str
+
+class PlantationBlockEdit(BaseModel):
+    name: str
+    area_size: float
+    plant_age: int
+    status: str
 
 class PlantationBlockCreate(PlantationBlockBase):
     pass
