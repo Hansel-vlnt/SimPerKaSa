@@ -2,7 +2,10 @@ import sqlite3
 from pymongo import MongoClient
 import os
 
-MONGODB_URL = "mongodb+srv://hanseldragon557_db_user:hanselSIMPERKASA@cluster0.4dsqt74.mongodb.net/?appName=Cluster0"
+from dotenv import load_dotenv
+
+load_dotenv()
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
 
 def migrate():
     # Connect to MongoDB
